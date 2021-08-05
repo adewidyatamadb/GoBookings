@@ -36,7 +36,7 @@
                 // notify("This is my message", "warning")
                 // notifyModal("title", "<em>Hello, World!</em>", "success", "My Text for the button")
                 let html = `
-                    <form id="check-availaibility-form" action="" method="post" novalidate class="needs-validation">
+                    <form id="check-availability-form" action="" method="post" novalidate class="needs-validation">
                         <div class="form-row">
                             <div class="col">
                                 <div class="form-row" id="reservation-dates-modal">
@@ -54,10 +54,29 @@
                 attention.custom({
                     msg: html, 
                     title:"Choose your dates",
+                    willOpen: () => {
+                            const elem = document.getElementById("reservation-dates-modal");
+                            const rp = new DateRangePicker(elem, {
+                                format: "dd-mm-yyyy",
+                                showOnFocus: true,
+                            });
+                    },
+                    didOpen: () => {
+                            document.getElementById('start').removeAttribute('disabled');
+                            document.getElementById('end').removeAttribute('disabled');
+    
+                    },
                     callback: function(result) {
                         console.log("called");
 
-                        fetch('/search-availability-json')
+                        let form = document.getElementById("check-availability-form");
+                        let formData = new FormData(form);
+                        formData.append("csrf_token", "{{.CSRFToken}}");
+
+                        fetch('/search-availability-json', {
+                            method: "post",
+                            body: formData,
+                        })
                             .then(response => response.json())
                             .then(data => {
                                 console.log(data);
