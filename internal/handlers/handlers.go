@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/adewidyatamadb/GoBookings/internal/config"
+	"github.com/adewidyatamadb/GoBookings/internal/forms"
 	"github.com/adewidyatamadb/GoBookings/internal/models"
 	"github.com/adewidyatamadb/GoBookings/internal/render"
 )
@@ -54,7 +55,14 @@ func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
 
 // Reservation renders the make a reservation page and displays form
 func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "make-reservation.page.html", &models.TemplateData{})
+	render.RenderTemplate(w, r, "make-reservation.page.html", &models.TemplateData{
+		Form: forms.New(nil),
+	})
+}
+
+// PostReservation handles the posting of a reservation form
+func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
+
 }
 
 // Reservation renders the generals room page
