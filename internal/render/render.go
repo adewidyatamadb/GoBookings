@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/adewidyatamadb/GoBookings/pkg/config"
-	"github.com/adewidyatamadb/GoBookings/pkg/models"
+	"github.com/adewidyatamadb/GoBookings/internal/config"
+	"github.com/adewidyatamadb/GoBookings/internal/models"
 	"github.com/justinas/nosurf"
 )
 
