@@ -9,3 +9,4 @@ This is my first Go Language Project
 - Uses [Vanilla JS Datepicker](https://mymth.github.io/vanillajs-datepicke) by mymth
 - Uses [Notie](https://jaredreich.com/notie/)
 - Uses [SweetAlert2](https://sweetalert2.github.io/)
+- Uses [govalidator](https://github.com/asaskevich/govalidator) by asaskevich
