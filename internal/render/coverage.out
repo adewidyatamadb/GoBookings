@@ -1,0 +1,23 @@
+mode: set
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:21.40,23.2 1 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:25.84,31.2 5 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:34.105,36.18 2 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:43.2,44.9 2 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:48.2,55.16 5 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:60.2,60.12 1 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:36.18,39.3 1 0
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:39.8,41.3 1 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:44.9,46.3 1 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:55.16,58.3 2 0
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:64.67,68.16 3 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:72.2,72.29 1 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:94.2,94.23 1 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:68.16,70.3 1 0
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:72.29,75.17 3 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:79.3,80.17 2 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:84.3,84.23 1 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:91.3,91.23 1 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:75.17,77.4 1 0
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:80.17,82.4 1 0
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:84.23,86.18 2 1
+github.com/adewidyatamadb/GoBookings/internal/render/render.go:86.18,88.5 1 0

@@ -1,0 +1,22 @@
+mode: set
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:24.47,28.2 1 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:31.33,33.2 1 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:36.67,41.2 3 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:44.68,54.2 5 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:57.74,66.2 4 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:69.78,71.16 2 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:76.2,89.19 6 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:100.2,102.66 2 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:71.16,74.3 2 0
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:89.19,98.3 4 0
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:105.81,107.9 2 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:114.2,120.4 4 0
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:107.9,112.3 4 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:124.71,126.2 1 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:129.69,131.2 1 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:134.75,136.2 1 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:139.79,144.2 3 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:152.79,159.16 3 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:163.2,164.14 2 1
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:159.16,161.3 1 0
+github.com/adewidyatamadb/GoBookings/internal/handlers/handlers.go:168.70,170.2 1 1
