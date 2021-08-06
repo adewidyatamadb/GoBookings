@@ -10,3 +10,4 @@ This is my first Go Language Project
 - Uses [Notie](https://jaredreich.com/notie/)
 - Uses [SweetAlert2](https://sweetalert2.github.io/)
 - Uses [govalidator](https://github.com/asaskevich/govalidator) by asaskevich
+- Uses [soda](https://gobuffalo.io/en/docs/db/getting-started/)
