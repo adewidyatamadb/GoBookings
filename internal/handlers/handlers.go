@@ -75,7 +75,7 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 
 	// 01-01-2021 -- 01/02 03:04:05PM '06 -0700
 
-	layout := "02-01-2021"
+	layout := "02-01-2006"
 	startDate, err := time.Parse(layout, sd)
 	if err != nil {
 		helpers.ServerError(w, err)
