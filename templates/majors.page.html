@@ -36,7 +36,7 @@
                 // notify("This is my message", "warning")
                 // notifyModal("title", "<em>Hello, World!</em>", "success", "My Text for the button")
                 let html = `
-                    <form id="check-availaibility-form" action="" method="post" novalidate class="needs-validation">
+                    <form id="check-availability-form" action="" method="post" novalidate class="needs-validation">
                         <div class="form-row">
                             <div class="col">
                                 <div class="form-row" id="reservation-dates-modal">
@@ -59,6 +59,7 @@
                             const rp = new DateRangePicker(elem, {
                                 format: "dd-mm-yyyy",
                                 showOnFocus: true,
+                                minDate: new Date(),
                             });
                     },
                     didOpen: () => {
@@ -67,11 +68,10 @@
     
                     },
                     callback: function(result) {
-                        console.log("called");
-
                         let form = document.getElementById("check-availability-form");
                         let formData = new FormData(form);
                         formData.append("csrf_token", "{{.CSRFToken}}");
+                        formData.append("room_id", "2")
 
                         fetch('/search-availability-json', {
                             method: "post",
@@ -79,10 +79,12 @@
                         })
                             .then(response => response.json())
                             .then(data => {
-                                console.log(data);
-                                console.log(data.ok);
-                                console.log(data.message);
-                            })
+                                if (data.ok){
+                                    console.log("room is available!");
+                                }else{
+                                    console.log("room is not available")
+                                }
+                        });
                     }
                 });
             });
