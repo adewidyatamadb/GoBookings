@@ -64,14 +64,14 @@ func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 	// get the reservation from session and cast it into models.Reservation
 	res, ok := m.App.Session.Get(r.Context(), "reservation").(models.Reservation)
 	if !ok {
-		helpers.ServerError(w, errors.New("cannot get reservation from session"))
-		return
+		m.App.Session.Put(r.Context(), "error", "cannot get reservation data")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	}
 
 	room, err := m.DB.GetRoomByID(res.RoomID)
 	if err != nil {
-		helpers.ServerError(w, err)
-		return
+		m.App.Session.Put(r.Context(), "error", "cannot find the room")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	}
 	res.Room.RoomName = room.RoomName
 
