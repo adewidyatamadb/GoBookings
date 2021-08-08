@@ -10,11 +10,6 @@ import (
 	"github.com/adewidyatamadb/GoBookings/internal/models"
 )
 
-type postData struct {
-	key   string
-	value string
-}
-
 var theTests = []struct {
 	name               string
 	url                string
