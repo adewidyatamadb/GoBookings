@@ -3,10 +3,10 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -112,15 +112,16 @@ func TestRepository_Reservation(t *testing.T) {
 }
 
 func TestRepository_PostReservation(t *testing.T) {
-	reqBody := "start_date=11-10-2021"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "end_date=12-10-2021")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=1")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "first_name=John")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "last_name=Smith")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "email=john@smith.com")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "phone=555-555-5555")
+	postedData := url.Values{}
+	postedData.Add("start_date", "11-10-2021")
+	postedData.Add("end_date", "12-10-2021")
+	postedData.Add("room_id", "1")
+	postedData.Add("first_name", "John")
+	postedData.Add("last_name", "Smith")
+	postedData.Add("email", "john@smith.com")
+	postedData.Add("phone", "555-555-5555")
 
-	req, _ := http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	req, _ := http.NewRequest("POST", "/make-reservation", strings.NewReader(postedData.Encode()))
 	ctx := getCTX(req)
 	req = req.WithContext(ctx)
 
@@ -153,15 +154,16 @@ func TestRepository_PostReservation(t *testing.T) {
 	}
 
 	// test for invalid arrival date
-	reqBody = "start_date=invalid"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "end_date=12-10-2021")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=1")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "first_name=John")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "last_name=Smith")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "email=john@smith.com")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "phone=555-555-5555")
+	postedData = url.Values{}
+	postedData.Add("start_date", "invalid")
+	postedData.Add("end_date", "12-10-2021")
+	postedData.Add("room_id", "1")
+	postedData.Add("first_name", "John")
+	postedData.Add("last_name", "Smith")
+	postedData.Add("email", "john@smith.com")
+	postedData.Add("phone", "555-555-5555")
 
-	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(postedData.Encode()))
 	ctx = getCTX(req)
 	req = req.WithContext(ctx)
 
@@ -178,15 +180,16 @@ func TestRepository_PostReservation(t *testing.T) {
 	}
 
 	// test for invalid departure date
-	reqBody = "start_date=12-10-2021"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "end_date=invalid")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=1")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "first_name=John")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "last_name=Smith")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "email=john@smith.com")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "phone=555-555-5555")
+	postedData = url.Values{}
+	postedData.Add("start_date", "11-10-2021")
+	postedData.Add("end_date", "invalid")
+	postedData.Add("room_id", "1")
+	postedData.Add("first_name", "John")
+	postedData.Add("last_name", "Smith")
+	postedData.Add("email", "john@smith.com")
+	postedData.Add("phone", "555-555-5555")
 
-	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(postedData.Encode()))
 	ctx = getCTX(req)
 	req = req.WithContext(ctx)
 
@@ -203,15 +206,16 @@ func TestRepository_PostReservation(t *testing.T) {
 	}
 
 	// test for invalid room id
-	reqBody = "start_date=12-10-2021"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "end_date=13-10-2021")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=3")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "first_name=John")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "last_name=Smith")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "email=john@smith.com")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "phone=555-555-5555")
+	postedData = url.Values{}
+	postedData.Add("start_date", "11-10-2021")
+	postedData.Add("end_date", "12-10-2021")
+	postedData.Add("room_id", "a")
+	postedData.Add("first_name", "John")
+	postedData.Add("last_name", "Smith")
+	postedData.Add("email", "john@smith.com")
+	postedData.Add("phone", "555-555-5555")
 
-	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(postedData.Encode()))
 	ctx = getCTX(req)
 	req = req.WithContext(ctx)
 
@@ -228,15 +232,16 @@ func TestRepository_PostReservation(t *testing.T) {
 	}
 
 	// test for invalid data
-	reqBody = "start_date=12-10-2021"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "end_date=13-10-2021")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=1")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "first_name=a")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "last_name=Smith")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "email=john@smith.com")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "phone=555-555-5555")
+	postedData = url.Values{}
+	postedData.Add("start_date", "11-10-2021")
+	postedData.Add("end_date", "12-10-2021")
+	postedData.Add("room_id", "1")
+	postedData.Add("first_name", "a")
+	postedData.Add("last_name", "Smith")
+	postedData.Add("email", "john@smith.com")
+	postedData.Add("phone", "555-555-5555")
 
-	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(postedData.Encode()))
 	ctx = getCTX(req)
 	req = req.WithContext(ctx)
 
@@ -253,15 +258,16 @@ func TestRepository_PostReservation(t *testing.T) {
 	}
 
 	// test for failed insert reservation data
-	reqBody = "start_date=12-10-2021"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "end_date=13-10-2021")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=2")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "first_name=John")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "last_name=Smith")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "email=john@smith.com")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "phone=555-555-5555")
+	postedData = url.Values{}
+	postedData.Add("start_date", "11-10-2021")
+	postedData.Add("end_date", "12-10-2021")
+	postedData.Add("room_id", "2")
+	postedData.Add("first_name", "John")
+	postedData.Add("last_name", "Smith")
+	postedData.Add("email", "john@smith.com")
+	postedData.Add("phone", "555-555-5555")
 
-	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(postedData.Encode()))
 	ctx = getCTX(req)
 	req = req.WithContext(ctx)
 
@@ -278,15 +284,16 @@ func TestRepository_PostReservation(t *testing.T) {
 	}
 
 	// test for failed insert room restriction data
-	reqBody = "start_date=12-10-2021"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "end_date=13-10-2021")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=100")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "first_name=John")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "last_name=Smith")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "email=john@smith.com")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "phone=555-555-5555")
+	postedData = url.Values{}
+	postedData.Add("start_date", "11-10-2021")
+	postedData.Add("end_date", "12-10-2021")
+	postedData.Add("room_id", "100")
+	postedData.Add("first_name", "John")
+	postedData.Add("last_name", "Smith")
+	postedData.Add("email", "john@smith.com")
+	postedData.Add("phone", "555-555-5555")
 
-	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/make-reservation", strings.NewReader(postedData.Encode()))
 	ctx = getCTX(req)
 	req = req.WithContext(ctx)
 
@@ -346,10 +353,11 @@ func TestRepository_ReservationSummary(t *testing.T) {
 
 func TestRepository_PostAvailability(t *testing.T) {
 	// test case valid condition
-	reqBody := "start=11-10-2021"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "end=12-10-2021")
+	postedData := url.Values{}
+	postedData.Add("start", "11-11-2021")
+	postedData.Add("end", "12-11-2021")
 
-	req, _ := http.NewRequest("POST", "/search-availability", strings.NewReader(reqBody))
+	req, _ := http.NewRequest("POST", "/search-availability", strings.NewReader(postedData.Encode()))
 	ctx := getCTX(req)
 	req = req.WithContext(ctx)
 
@@ -383,10 +391,11 @@ func TestRepository_PostAvailability(t *testing.T) {
 	}
 
 	// case cannot retrieve rooms data from the database
-	reqBody = "start=01-01-2021"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "end=12-10-2021")
+	postedData = url.Values{}
+	postedData.Add("start", "01-01-2021")
+	postedData.Add("end", "12-11-2021")
 
-	req, _ = http.NewRequest("POST", "/search-availability", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/search-availability", strings.NewReader(postedData.Encode()))
 	ctx = getCTX(req)
 	req = req.WithContext(ctx)
 
@@ -403,10 +412,11 @@ func TestRepository_PostAvailability(t *testing.T) {
 	}
 
 	// case there is no room available
-	reqBody = "start=30-12-2020"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "end=02-01-2021")
+	postedData = url.Values{}
+	postedData.Add("start", "30-12-2020")
+	postedData.Add("end", "02-01-2021")
 
-	req, _ = http.NewRequest("POST", "/search-availability", strings.NewReader(reqBody))
+	req, _ = http.NewRequest("POST", "/search-availability", strings.NewReader(postedData.Encode()))
 	ctx = getCTX(req)
 	req = req.WithContext(ctx)
 
@@ -496,11 +506,12 @@ func TestRepository_ChooseRoom(t *testing.T) {
 
 func TestRepository_AvailabilityJSON(t *testing.T) {
 	// case - rooms are not available
-	reqBody := "start=11-10-2021"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "end=12-10-2021")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=3")
+	postedData := url.Values{}
+	postedData.Add("start", "11-10-2021")
+	postedData.Add("start", "12-10-2021")
+	postedData.Add("room_id", "3")
 
-	req, err := http.NewRequest("POST", "/search-availability-json", strings.NewReader(reqBody))
+	req, err := http.NewRequest("POST", "/search-availability-json", strings.NewReader(postedData.Encode()))
 	if err != nil {
 		t.Error(err)
 	}
@@ -524,11 +535,15 @@ func TestRepository_AvailabilityJSON(t *testing.T) {
 	}
 
 	// case - room is available
-	reqBody = "start=11-10-2021"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "end=12-10-2021")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=1")
+	postedData = url.Values{}
+	postedData.Add("start", "11-10-2021")
+	postedData.Add("start", "12-10-2021")
+	postedData.Add("room_id", "1")
 
-	req, _ = http.NewRequest("POST", "/search-availability-json", strings.NewReader(reqBody))
+	req, err = http.NewRequest("POST", "/search-availability-json", strings.NewReader(postedData.Encode()))
+	if err != nil {
+		t.Error(err)
+	}
 	ctx = getCTX(req)
 	req = req.WithContext(ctx)
 
@@ -550,10 +565,6 @@ func TestRepository_AvailabilityJSON(t *testing.T) {
 	}
 
 	// case - invalid form
-	// reqBody = "start=11-10-2021"
-	// reqBody = fmt.Sprintf("%s&%s", reqBody, "end=12-10-2021")
-	// reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=1")
-
 	req, _ = http.NewRequest("POST", "/search-availability-json", nil)
 	ctx = getCTX(req)
 	req = req.WithContext(ctx)
@@ -576,11 +587,15 @@ func TestRepository_AvailabilityJSON(t *testing.T) {
 	}
 
 	// case - invalid room id
-	reqBody = "start=11-10-2021"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "end=12-10-2021")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=a")
+	postedData = url.Values{}
+	postedData.Add("start", "11-10-2021")
+	postedData.Add("start", "12-10-2021")
+	postedData.Add("room_id", "a")
 
-	req, _ = http.NewRequest("POST", "/search-availability-json", strings.NewReader(reqBody))
+	req, err = http.NewRequest("POST", "/search-availability-json", strings.NewReader(postedData.Encode()))
+	if err != nil {
+		t.Error(err)
+	}
 	ctx = getCTX(req)
 	req = req.WithContext(ctx)
 
@@ -602,11 +617,15 @@ func TestRepository_AvailabilityJSON(t *testing.T) {
 	}
 
 	// case - cannot retrieve data from the database
-	reqBody = "start=11-10-2021"
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "end=12-10-2021")
-	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=100")
+	postedData = url.Values{}
+	postedData.Add("start", "11-10-2021")
+	postedData.Add("start", "12-10-2021")
+	postedData.Add("room_id", "100")
 
-	req, _ = http.NewRequest("POST", "/search-availability-json", strings.NewReader(reqBody))
+	req, err = http.NewRequest("POST", "/search-availability-json", strings.NewReader(postedData.Encode()))
+	if err != nil {
+		t.Error(err)
+	}
 	ctx = getCTX(req)
 	req = req.WithContext(ctx)
 
