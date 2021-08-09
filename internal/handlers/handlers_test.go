@@ -8,8 +8,12 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/adewidyatamadb/GoBookings/internal/config"
+	"github.com/adewidyatamadb/GoBookings/internal/driver"
 	"github.com/adewidyatamadb/GoBookings/internal/models"
+	"github.com/go-chi/chi/v5"
 )
 
 var theTests = []struct {
@@ -24,6 +28,16 @@ var theTests = []struct {
 	{"/majors-suite", "/majors-suite", "GET", http.StatusOK},
 	{"/search-availability", "/search-availability", "GET", http.StatusOK},
 	{"/contact", "/contact", "GET", http.StatusOK},
+}
+
+func TestNewRepo(t *testing.T) {
+	var app config.AppConfig
+	db, err := driver.ConnectSQL("host=localhost port=5432 dbname=bookings user=postgres password=root")
+	if err != nil {
+		log.Fatal("cannot connect to the database! dying...")
+	}
+
+	NewRepo(&app, db)
 }
 
 func TestHandlers(t *testing.T) {
@@ -78,7 +92,7 @@ func TestRepository_Reservation(t *testing.T) {
 
 	handler.ServeHTTP(rr, req)
 	if rr.Code != http.StatusTemporaryRedirect {
-		t.Errorf("reservation handler returened wrong response code: got %d, wanted %d", rr.Code, http.StatusOK)
+		t.Errorf("reservation handler returened wrong response code: got %d, wanted %d", rr.Code, http.StatusTemporaryRedirect)
 	}
 
 	// test with non existent room
@@ -92,7 +106,7 @@ func TestRepository_Reservation(t *testing.T) {
 
 	handler.ServeHTTP(rr, req)
 	if rr.Code != http.StatusTemporaryRedirect {
-		t.Errorf("reservation handler returened wrong response code: got %d, wanted %d", rr.Code, http.StatusOK)
+		t.Errorf("reservation handler returened wrong response code: got %d, wanted %d", rr.Code, http.StatusTemporaryRedirect)
 	}
 }
 
@@ -121,7 +135,7 @@ func TestRepository_PostReservation(t *testing.T) {
 		t.Errorf("reservation handler returened wrong response code: got %d, wanted %d", rr.Code, http.StatusSeeOther)
 	}
 
-	// case if the post body is mission
+	// case if the post body is missing
 	req, _ = http.NewRequest("POST", "/make-reservation", nil)
 	ctx = getCTX(req)
 	req = req.WithContext(ctx)
@@ -285,6 +299,231 @@ func TestRepository_PostReservation(t *testing.T) {
 
 	if rr.Code != http.StatusTemporaryRedirect {
 		t.Errorf("reservation handler returned wrong response code for failed insert data: got %d, wanted %d", rr.Code, http.StatusTemporaryRedirect)
+	}
+}
+
+func TestRepository_ReservationSummary(t *testing.T) {
+	start := "11-11-2021"
+	end := "12-11-2021"
+
+	layout := "02-01-2006"
+	startDate, _ := time.Parse(layout, start)
+	endDate, _ := time.Parse(layout, end)
+
+	reservation := models.Reservation{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	req, _ := http.NewRequest("GET", "/reservation-summary", nil)
+	ctx := getCTX(req)
+	req = req.WithContext(ctx)
+
+	rr := httptest.NewRecorder()
+	session.Put(ctx, "reservation", reservation)
+
+	handler := http.HandlerFunc(Repo.ReservationSummary)
+
+	handler.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Errorf("reservation handler returned wrong response code: got %d, wanted %d", rr.Code, http.StatusOK)
+	}
+
+	// test case if data cannot get pulled from session
+	req, _ = http.NewRequest("GET", "/make-reservation", nil)
+	ctx = getCTX(req)
+	req = req.WithContext(ctx)
+
+	rr = httptest.NewRecorder()
+
+	handler.ServeHTTP(rr, req)
+	if rr.Code != http.StatusTemporaryRedirect {
+		t.Errorf("reservation handler returened wrong response code: got %d, wanted %d", rr.Code, http.StatusOK)
+	}
+
+}
+
+func TestRepository_PostAvailability(t *testing.T) {
+	// test case valid condition
+	reqBody := "start=11-10-2021"
+	reqBody = fmt.Sprintf("%s&%s", reqBody, "end=12-10-2021")
+
+	req, _ := http.NewRequest("POST", "/search-availability", strings.NewReader(reqBody))
+	ctx := getCTX(req)
+	req = req.WithContext(ctx)
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	rr := httptest.NewRecorder()
+
+	handler := http.HandlerFunc(Repo.PostAvailability)
+
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Errorf("reservation handler returened wrong response code: got %d, wanted %d", rr.Code, http.StatusOK)
+	}
+
+	// case if post missing request body
+	req, _ = http.NewRequest("POST", "/search-availability", nil)
+	ctx = getCTX(req)
+	req = req.WithContext(ctx)
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	rr = httptest.NewRecorder()
+
+	handler = http.HandlerFunc(Repo.PostAvailability)
+
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusTemporaryRedirect {
+		t.Errorf("reservation handler returened wrong response code: got %d, wanted %d", rr.Code, http.StatusTemporaryRedirect)
+	}
+
+	// case cannot retrieve rooms data from the database
+	reqBody = "start=01-01-2021"
+	reqBody = fmt.Sprintf("%s&%s", reqBody, "end=12-10-2021")
+
+	req, _ = http.NewRequest("POST", "/search-availability", strings.NewReader(reqBody))
+	ctx = getCTX(req)
+	req = req.WithContext(ctx)
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	rr = httptest.NewRecorder()
+
+	handler = http.HandlerFunc(Repo.PostAvailability)
+
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusTemporaryRedirect {
+		t.Errorf("reservation handler returened wrong response code: got %d, wanted %d", rr.Code, http.StatusTemporaryRedirect)
+	}
+
+	// case there is no room available
+	reqBody = "start=30-12-2020"
+	reqBody = fmt.Sprintf("%s&%s", reqBody, "end=02-01-2021")
+
+	req, _ = http.NewRequest("POST", "/search-availability", strings.NewReader(reqBody))
+	ctx = getCTX(req)
+	req = req.WithContext(ctx)
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	rr = httptest.NewRecorder()
+
+	handler = http.HandlerFunc(Repo.PostAvailability)
+
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusSeeOther {
+		t.Errorf("reservation handler returened wrong response code: got %d, wanted %d", rr.Code, http.StatusSeeOther)
+	}
+}
+
+func TestRepository_ChooseRoom(t *testing.T) {
+	// intended case
+	reservation := models.Reservation{
+		RoomID: 1,
+		Room: models.Room{
+			ID:       1,
+			RoomName: "General's Quarters",
+		},
+	}
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/choose-room", nil)
+
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("id", "1")
+
+	ctx := getCTX(r)
+
+	r = r.WithContext(context.WithValue(ctx, chi.RouteCtxKey, rctx))
+
+	session.Put(r.Context(), "reservation", reservation)
+
+	handler := http.HandlerFunc(Repo.ChooseRoom)
+
+	handler.ServeHTTP(w, r)
+	if w.Code != http.StatusSeeOther {
+		t.Errorf("reservation handler returned wrong response code: got %d, wanted %d", w.Code, http.StatusSeeOther)
+	}
+
+	//test case if id is not integer
+	w = httptest.NewRecorder()
+	r = httptest.NewRequest("GET", "/choose-room", nil)
+
+	rctx = chi.NewRouteContext()
+	rctx.URLParams.Add("id", "a")
+
+	ctx = getCTX(r)
+
+	r = r.WithContext(context.WithValue(ctx, chi.RouteCtxKey, rctx))
+
+	session.Put(r.Context(), "reservation", reservation)
+
+	handler = http.HandlerFunc(Repo.ChooseRoom)
+
+	handler.ServeHTTP(w, r)
+	if w.Code != http.StatusTemporaryRedirect {
+		t.Errorf("reservation handler returned wrong response code: got %d, wanted %d", w.Code, http.StatusTemporaryRedirect)
+	}
+
+	// test case if there is no reservation data in the session
+	//test case if id is not integer
+	w = httptest.NewRecorder()
+	r = httptest.NewRequest("GET", "/choose-room", nil)
+
+	rctx = chi.NewRouteContext()
+	rctx.URLParams.Add("id", "1")
+
+	ctx = getCTX(r)
+
+	r = r.WithContext(context.WithValue(ctx, chi.RouteCtxKey, rctx))
+
+	session.Put(r.Context(), "non-existent", reservation)
+
+	handler = http.HandlerFunc(Repo.ChooseRoom)
+
+	handler.ServeHTTP(w, r)
+	if w.Code != http.StatusTemporaryRedirect {
+		t.Errorf("reservation handler returned wrong response code: got %d, wanted %d", w.Code, http.StatusTemporaryRedirect)
+	}
+}
+
+func TestRepository_AvailabilityJSON(t *testing.T) {
+
+}
+
+func TestRepository_BookRoom(t *testing.T) {
+	// intended case
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/book-room?id=1&s=11-11-2021&e=12-11-2021", nil)
+	ctx := getCTX(r)
+	r = r.WithContext(ctx)
+
+	handler := http.HandlerFunc(Repo.BookRoom)
+
+	handler.ServeHTTP(w, r)
+
+	if w.Code != http.StatusSeeOther {
+		t.Errorf("reservation handler returned wrong response code: got %d, wanted %d", w.Code, http.StatusSeeOther)
+	}
+
+	// test case if id is invalid
+	w = httptest.NewRecorder()
+	r = httptest.NewRequest("GET", "/book-room?id=3&s=11-11-2021&e=12-11-2021", nil)
+	ctx = getCTX(r)
+	r = r.WithContext(ctx)
+
+	handler = http.HandlerFunc(Repo.BookRoom)
+
+	handler.ServeHTTP(w, r)
+
+	if w.Code != http.StatusTemporaryRedirect {
+		t.Errorf("reservation handler returned wrong response code: got %d, wanted %d", w.Code, http.StatusTemporaryRedirect)
 	}
 }
 
