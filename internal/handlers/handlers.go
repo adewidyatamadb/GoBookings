@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -9,7 +10,6 @@ import (
 	"github.com/adewidyatamadb/GoBookings/internal/config"
 	"github.com/adewidyatamadb/GoBookings/internal/driver"
 	"github.com/adewidyatamadb/GoBookings/internal/forms"
-	"github.com/adewidyatamadb/GoBookings/internal/helpers"
 	"github.com/adewidyatamadb/GoBookings/internal/models"
 	"github.com/adewidyatamadb/GoBookings/internal/render"
 	"github.com/adewidyatamadb/GoBookings/internal/repository"
@@ -304,16 +304,56 @@ type jsonResponse struct {
 
 // AvailabilityJSON handles request for availability and send JSON response
 func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
+	// parsing req body
+	err := r.ParseForm()
+	if err != nil {
+		//cannot parse form, so return appropiate json
+		resp := jsonResponse{
+			OK:      false,
+			Message: "Internal server error",
+		}
+
+		out, _ := json.MarshalIndent(resp, "", "     ")
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(out)
+		return
+	}
+
 	sd := r.Form.Get("start")
 	ed := r.Form.Get("end")
-
 	layout := "02-01-2006"
 	startDate, _ := time.Parse(layout, sd)
 	endDate, _ := time.Parse(layout, ed)
 
-	roomID, _ := strconv.Atoi(r.Form.Get("room_id"))
+	roomID, err := strconv.Atoi(r.Form.Get("room_id"))
+	if err != nil {
+		//cannot convert room id, so return appropiate json
+		resp := jsonResponse{
+			OK:      false,
+			Message: "Error parsing room id",
+		}
 
-	available, _ := m.DB.SearchAvailabilityByDatesByRoomID(startDate, endDate, roomID)
+		out, _ := json.MarshalIndent(resp, "", "     ")
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(out)
+		return
+	}
+	log.Println(roomID)
+
+	available, err := m.DB.SearchAvailabilityByDatesByRoomID(startDate, endDate, roomID)
+	if err != nil {
+		//cannot retrieve data from database, so return appropiate json
+		resp := jsonResponse{
+			OK:      false,
+			Message: "Error connecting to the database",
+		}
+
+		out, _ := json.MarshalIndent(resp, "", "     ")
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(out)
+		return
+	}
+
 	resp := jsonResponse{
 		OK:        available,
 		Message:   "",
@@ -322,11 +362,7 @@ func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
 		RoomID:    strconv.Itoa(roomID),
 	}
 
-	out, err := json.MarshalIndent(resp, "", "     ")
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
+	out, _ := json.MarshalIndent(resp, "", "     ")
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(out)

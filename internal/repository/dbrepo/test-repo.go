@@ -31,7 +31,13 @@ func (m *testDBRepo) InsertRoomRestriction(res models.RoomRestriction) error {
 
 // SearchAvailabilityByDatesByRoomID returns true if room available and return false if room is not available
 func (m *testDBRepo) SearchAvailabilityByDatesByRoomID(start, end time.Time, roomID int) (bool, error) {
-	return false, nil
+	if roomID == 3 {
+		return false, nil
+	} else if roomID == 100 {
+		return false, errors.New("some error")
+	} else {
+		return true, nil
+	}
 }
 
 // SearchAvailabilityForAllRooms returns a slice of available rooms if any for given date range
@@ -46,14 +52,13 @@ func (m *testDBRepo) SearchAvailabilityForAllRooms(start, end time.Time) ([]mode
 		return nil, errors.New("some error")
 	} else if end == endDate {
 		return rooms, nil
-	} else {
-		rooms = append(rooms, models.Room{
-			ID:       1,
-			RoomName: "General's Quarter",
-		})
-
-		return rooms, nil
 	}
+	rooms = append(rooms, models.Room{
+		ID:       1,
+		RoomName: "General's Quarter",
+	})
+
+	return rooms, nil
 
 }
 

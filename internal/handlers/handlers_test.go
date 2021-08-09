@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -494,7 +495,137 @@ func TestRepository_ChooseRoom(t *testing.T) {
 }
 
 func TestRepository_AvailabilityJSON(t *testing.T) {
+	// case - rooms are not available
+	reqBody := "start=11-10-2021"
+	reqBody = fmt.Sprintf("%s&%s", reqBody, "end=12-10-2021")
+	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=3")
 
+	req, err := http.NewRequest("POST", "/search-availability-json", strings.NewReader(reqBody))
+	if err != nil {
+		t.Error(err)
+	}
+	ctx := getCTX(req)
+	req = req.WithContext(ctx)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	rr := httptest.NewRecorder()
+
+	handler := http.HandlerFunc(Repo.AvailabilityJSON)
+
+	handler.ServeHTTP(rr, req)
+
+	var j jsonResponse
+	err = json.Unmarshal(rr.Body.Bytes(), &j)
+	if err != nil {
+		t.Error("failed to parse json")
+	}
+	if j.OK {
+		t.Error("room supposed to be unavailable")
+	}
+
+	// case - room is available
+	reqBody = "start=11-10-2021"
+	reqBody = fmt.Sprintf("%s&%s", reqBody, "end=12-10-2021")
+	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=1")
+
+	req, _ = http.NewRequest("POST", "/search-availability-json", strings.NewReader(reqBody))
+	ctx = getCTX(req)
+	req = req.WithContext(ctx)
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	rr = httptest.NewRecorder()
+
+	handler = http.HandlerFunc(Repo.AvailabilityJSON)
+
+	handler.ServeHTTP(rr, req)
+
+	err = json.Unmarshal(rr.Body.Bytes(), &j)
+	if err != nil {
+		t.Error("failed to parse json")
+	}
+
+	if !j.OK {
+		t.Error("room supposed to be available")
+	}
+
+	// case - invalid form
+	// reqBody = "start=11-10-2021"
+	// reqBody = fmt.Sprintf("%s&%s", reqBody, "end=12-10-2021")
+	// reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=1")
+
+	req, _ = http.NewRequest("POST", "/search-availability-json", nil)
+	ctx = getCTX(req)
+	req = req.WithContext(ctx)
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	rr = httptest.NewRecorder()
+
+	handler = http.HandlerFunc(Repo.AvailabilityJSON)
+
+	handler.ServeHTTP(rr, req)
+
+	err = json.Unmarshal(rr.Body.Bytes(), &j)
+	if err != nil {
+		t.Error("failed to parse json")
+	}
+
+	if j.OK {
+		t.Error("form supposed to be cannot be parsed")
+	}
+
+	// case - invalid room id
+	reqBody = "start=11-10-2021"
+	reqBody = fmt.Sprintf("%s&%s", reqBody, "end=12-10-2021")
+	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=a")
+
+	req, _ = http.NewRequest("POST", "/search-availability-json", strings.NewReader(reqBody))
+	ctx = getCTX(req)
+	req = req.WithContext(ctx)
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	rr = httptest.NewRecorder()
+
+	handler = http.HandlerFunc(Repo.AvailabilityJSON)
+
+	handler.ServeHTTP(rr, req)
+
+	err = json.Unmarshal(rr.Body.Bytes(), &j)
+	if err != nil {
+		t.Error("failed to parse json")
+	}
+
+	if j.OK {
+		t.Error("room id supposed to be cannot be converted")
+	}
+
+	// case - cannot retrieve data from the database
+	reqBody = "start=11-10-2021"
+	reqBody = fmt.Sprintf("%s&%s", reqBody, "end=12-10-2021")
+	reqBody = fmt.Sprintf("%s&%s", reqBody, "room_id=100")
+
+	req, _ = http.NewRequest("POST", "/search-availability-json", strings.NewReader(reqBody))
+	ctx = getCTX(req)
+	req = req.WithContext(ctx)
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	rr = httptest.NewRecorder()
+
+	handler = http.HandlerFunc(Repo.AvailabilityJSON)
+
+	handler.ServeHTTP(rr, req)
+
+	err = json.Unmarshal(rr.Body.Bytes(), &j)
+	if err != nil {
+		t.Error("failed to parse json")
+	}
+
+	if j.OK {
+		t.Error("data supposed to be cannot be retrieved from the database")
+	}
 }
 
 func TestRepository_BookRoom(t *testing.T) {
