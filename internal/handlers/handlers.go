@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -176,6 +177,39 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 		m.App.Session.Put(r.Context(), "error", "cannot insert room restriction into the database!")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	}
+
+	// send notifications - to guest
+	htmlMessage := fmt.Sprintf(`
+		<strong>Reservation Confirmation</strong>
+		<br>
+		Dear %s: <br>
+		This is to confirm your reservation from %s to %s.end
+	`, reservation.FirstName, reservation.StartDate.Format("02-Jan-2006"), reservation.EndDate.Format("02-Jan-2006"))
+
+	msg := models.MailData{
+		To:      reservation.Email,
+		From:    "fort@smythe.com",
+		Subject: "Reservation Confirmation",
+		Content: htmlMessage,
+	}
+
+	m.App.MailChan <- msg
+
+	// send notifications - owner
+	htmlMessage = fmt.Sprintf(`
+		<strong>Reservation Notification</strong>
+		<br>
+		A reservation has been made for %s from %s to %s.
+	`, reservation.Room.RoomName, reservation.StartDate.Format("02-Jan-2006"), reservation.EndDate.Format("02-Jan-2006"))
+
+	msg = models.MailData{
+		To:      "me@here.com",
+		From:    "fort@smythe.com",
+		Subject: "Reservation Notification",
+		Content: htmlMessage,
+	}
+
+	m.App.MailChan <- msg
 
 	m.App.Session.Put(r.Context(), "reservation", reservation)
 
