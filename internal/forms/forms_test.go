@@ -1,7 +1,6 @@
 package forms
 
 import (
-	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
@@ -18,102 +17,120 @@ func TestForm_Valid(t *testing.T) {
 }
 
 func TestForm_Required(t *testing.T) {
-	r := httptest.NewRequest("POST", "/whatever", nil)
-	form := New(r.PostForm)
-
-	form.Required("a", "b", "c")
-	if form.Valid() {
-		t.Error("form shows valid when required fields missing")
+	var tableTest = []struct {
+		name  string
+		valid bool
+	}{
+		{"missing field", false},
+		{"valid form", true},
 	}
 
-	postedData := url.Values{}
-	postedData.Add("a", "a")
-	postedData.Add("b", "a")
-	postedData.Add("c", "a")
+	for _, test := range tableTest {
+		r := httptest.NewRequest("POST", "/whatever", nil)
+		var f *Form
+		postedData := url.Values{}
+		if test.valid {
+			postedData.Add("a", "a")
+			postedData.Add("b", "a")
+			postedData.Add("c", "a")
+			r.PostForm = postedData
+			form := New(r.PostForm)
+			f = form
+		} else {
+			form := New(r.PostForm)
+			f = form
+		}
 
-	r, _ = http.NewRequest("POST", "/whatever", nil)
-	r.PostForm = postedData
-	form = New(r.PostForm)
-	form.Required("a", "b", "c")
-	for !form.Valid() {
-		t.Error("form shows does not have required fields when it does")
+		f.Required("a", "b", "c")
+		if f.Valid() != test.valid {
+			t.Errorf("case - %s: test returned %v wanted %v", test.name, f.Valid(), test.valid)
+		}
 	}
-
 }
 
 func TestForm_Has(t *testing.T) {
-	postedData := url.Values{}
-	form := New(postedData)
-
-	if form.Has("a") {
-		t.Error("form shows has field when it does not")
+	var tableTest = []struct {
+		name     string
+		hasField bool
+	}{
+		{"field not exist", false},
+		{"field exist", true},
 	}
 
-	postedData = url.Values{}
-	postedData.Add("a", "a")
-	form = New(postedData)
-	if !form.Has("a") {
-		t.Error("form shows it does not have field when it does")
+	for _, test := range tableTest {
+		postedData := url.Values{}
+
+		if test.hasField {
+			postedData.Add("a", "a")
+		}
+		form := New(postedData)
+
+		if form.Has("a") != test.hasField {
+			t.Errorf("case - %s: test return %v, wanted %v", test.name, form.Has("a"), test.hasField)
+		}
 	}
 }
 
 func TestForm_MinLength(t *testing.T) {
-	invalidData := url.Values{}
-	invalidData.Add("a", "a")
-	form := New(invalidData)
-
-	form.MinLength("a", 5)
-	if form.Valid() {
-		t.Error("form shows valid input length when it does not")
+	var tableTest = []struct {
+		name       string
+		param      string
+		valid      bool
+		fieldExist bool
+		err        string
+	}{
+		{"invalid data", "a", false, true, "This field must be at least 5 characters long"},
+		{"non-existent field", "a", false, false, ""},
+		{"valid", "valid", true, true, ""},
 	}
 
-	isError := form.Errors.Get("a")
-	if isError == "" {
-		t.Error("should have an error, but did not get one")
-	}
+	for _, test := range tableTest {
+		data := url.Values{}
+		data.Add("field", test.param)
+		form := New(data)
+		if test.fieldExist {
+			form.MinLength("field", 5)
+		} else {
+			form.MinLength("not-exist", 5)
+		}
 
-	form.MinLength("non-existent", 5)
-	if form.Valid() {
-		t.Error("form shows valid input length when the field does not exist")
-	}
+		if form.Valid() != test.valid {
+			t.Errorf("case - %s: test return %v, wanted %v", test.name, form.Valid(), test.valid)
+		}
 
-	validData := url.Values{}
-	validData.Add("valid", "valid")
-	form = New(validData)
-
-	form.MinLength("valid", 5)
-	if !form.Valid() {
-		t.Error("form shows invalid input length when it does")
-	}
-
-	isError = form.Errors.Get("valid")
-	if isError != "" {
-		t.Error("should not get an error but got one")
+		err := form.Errors.Get("field")
+		if err != test.err {
+			t.Errorf("case - %s: test return %s, wanted %s", test.name, err, test.err)
+		}
 	}
 
 }
 
 func TestForm_IsEmail(t *testing.T) {
-	invalidData := url.Values{}
-	invalidData.Add("a", "invalid")
-	form := New(invalidData)
-
-	form.IsEmail("a")
-	if form.Valid() {
-		t.Error("form shows valid email address when it does not")
+	var tableTest = []struct {
+		name       string
+		fieldName  string
+		value      string
+		fieldExist bool
+		valid      bool
+	}{
+		{"invalid data", "field", "invalid", true, false},
+		{"invalid data", "field", "invalid", false, false},
+		{"valid data", "field", "valid@email.com", true, true},
 	}
 
-	form.IsEmail("non-existent")
-	if form.Valid() {
-		t.Error("form shows valid email address then the field does not exist")
-	}
+	for _, test := range tableTest {
+		data := url.Values{}
+		data.Add(test.fieldName, test.value)
+		form := New(data)
+		if test.fieldExist {
+			form.IsEmail(test.fieldName)
+		} else {
+			form.IsEmail("non-existent-field")
+		}
 
-	validData := url.Values{}
-	validData.Add("a", "valid@email.com")
-	form = New(validData)
-
-	form.IsEmail("a")
-	if !form.Valid() {
-		t.Error("form shows invalid email address when it does")
+		if form.Valid() != test.valid {
+			t.Errorf("case - %s: test returned %v, wanted %v", test.name, form.Valid(), test.valid)
+		}
 	}
 }
