@@ -13,3 +13,5 @@ This is my first Go Language Project
 - Uses [soda](https://gobuffalo.io/en/docs/db/getting-started/)
 - Uses [Go Simple Mail](https://github.com/xhit/go-simple-mail)
 - Uses [MailHog](https://github.com/mailhog/MailHog)
+- Uses [Bootstrap 4](https://getbootstrap.com/docs/4.0/getting-started/introduction/)
+- Uses [Foundation as Email Template](https://get.foundation/emails.html)
