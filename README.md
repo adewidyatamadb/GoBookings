@@ -11,3 +11,5 @@ This is my first Go Language Project
 - Uses [SweetAlert2](https://sweetalert2.github.io/)
 - Uses [govalidator](https://github.com/asaskevich/govalidator) by asaskevich
 - Uses [soda](https://gobuffalo.io/en/docs/db/getting-started/)
+- Uses [Go Simple Mail](https://github.com/xhit/go-simple-mail)
+- Uses [MailHog](https://github.com/mailhog/MailHog)

@@ -35,6 +35,19 @@ func main() {
 	// http.HandleFunc("/", handlers.Repo.Home)
 	// http.HandleFunc("/about", handlers.Repo.About)
 
+	fmt.Println("Starting mail listener...")
+	defer close(app.MailChan)
+	listenForMail()
+
+	// msg := models.MailData{
+	// 	To:      "john@smith.com",
+	// 	From:    "me@here.com",
+	// 	Subject: "Some Subject",
+	// 	Content: "",
+	// }
+
+	// app.MailChan <- msg
+
 	fmt.Printf("Starting application on %s%s\n", server, portNumber)
 	// _ = http.ListenAndServe(server+portNumber, nil)
 
@@ -53,6 +66,9 @@ func run() (*driver.DB, error) {
 	gob.Register(models.User{})
 	gob.Register(models.Room{})
 	gob.Register(models.Restriction{})
+
+	mailChan := make(chan models.MailData)
+	app.MailChan = mailChan
 
 	// change this to true when in production
 	app.InProduction = false
