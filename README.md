@@ -15,3 +15,4 @@ This is my first Go Language Project
 - Uses [MailHog](https://github.com/mailhog/MailHog)
 - Uses [Bootstrap 4](https://getbootstrap.com/docs/4.0/getting-started/introduction/)
 - Uses [Foundation as Email Template](https://get.foundation/emails.html)
+- Uses [BootsrapDash RoyalUI as admin template](https://github.com/BootstrapDash/RoyalUI-Free-Bootstrap-Admin-Template)
