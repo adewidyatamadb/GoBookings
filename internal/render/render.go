@@ -7,19 +7,28 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"github.com/adewidyatamadb/GoBookings/internal/config"
 	"github.com/adewidyatamadb/GoBookings/internal/models"
 	"github.com/justinas/nosurf"
 )
 
-var functions = template.FuncMap{}
+var functions = template.FuncMap{
+	"humanDate": HumanDate,
+}
+
 var app *config.AppConfig
 var pathToTemplates = "./templates"
 
 // NewRenderer sets the config for the template package
 func NewRenderer(a *config.AppConfig) {
 	app = a
+}
+
+// HumanDate returns readable date
+func HumanDate(t time.Time) string {
+	return t.Format("02-Jan-2006")
 }
 
 func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
