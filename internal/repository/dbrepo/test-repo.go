@@ -70,3 +70,20 @@ func (m *testDBRepo) GetRoomByID(id int) (models.Room, error) {
 	}
 	return room, nil
 }
+
+// GetUserByID retrieve user data from the database using id
+func (m *testDBRepo) GetUserByID(id int) (models.User, error) {
+	var u models.User
+
+	return u, nil
+}
+
+// UpdateUser update user data in the database
+func (m *testDBRepo) UpdateUser(u models.User) error {
+	return nil
+}
+
+// Authentice authenticates a user
+func (m *testDBRepo) Authenticate(email, testPassword string) (int, string, error) {
+	return 0, "", nil
+}
