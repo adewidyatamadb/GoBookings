@@ -23,9 +23,9 @@
         <body>
             <div class="container-scroller">
                 <!-- partial:partials/_navbar.html -->
-                <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+                <nav class="flex-row p-0 navbar col-lg-12 col-12 fixed-top d-flex">
                     <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
-                        <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+                        <button class="navbar-toggler align-self-center" type="button" data-toggle="minimize">
                             <span class="ti-view-list"></span>
                         </button>
                     </div>
@@ -62,16 +62,16 @@
                             <div class="collapse" id="ui-basic">
                                 <ul class="nav flex-column sub-menu">
                                     <li class="nav-item"> 
-                                        <a class="nav-link" href="/admin/reservation-new">New Reservation</a>
+                                        <a class="nav-link" href="/admin/reservations-new">New Reservation</a>
                                     </li>
                                     <li class="nav-item"> 
-                                        <a class="nav-link" href="/admin/reservation-all">All Reservation</a>
+                                        <a class="nav-link" href="/admin/reservations-all">All Reservation</a>
                                     </li>
                                 </ul>
                             </div>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/admin/reservation-calendar">
+                            <a class="nav-link" href="/admin/reservations-calendar">
                                 <i class="ti-layout-list-post menu-icon"></i>
                                 <span class="menu-title">Reservation Calendar</span>
                             </a>
@@ -85,7 +85,7 @@
                             <div class="col-md-12 grid-margin">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h4 class="font-weight-bold mb-0">{{block "page-title" .}}{{end}}</h4>
+                                        <h4 class="mb-0 font-weight-bold">{{block "page-title" .}}{{end}}</h4>
                                     </div>
                                     <div>
 
