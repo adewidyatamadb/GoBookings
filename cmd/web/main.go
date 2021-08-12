@@ -39,8 +39,6 @@ func main() {
 	defer close(app.MailChan)
 	listenForMail()
 
-	
-
 	fmt.Printf("Starting application on %s%s\n", server, portNumber)
 	// _ = http.ListenAndServe(server+portNumber, nil)
 
@@ -59,6 +57,7 @@ func run() (*driver.DB, error) {
 	gob.Register(models.User{})
 	gob.Register(models.Room{})
 	gob.Register(models.Restriction{})
+	gob.Register(map[string]int{})
 
 	mailChan := make(chan models.MailData)
 	app.MailChan = mailChan

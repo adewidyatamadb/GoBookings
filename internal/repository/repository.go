@@ -15,6 +15,7 @@ type DatabaseRepo interface {
 	SearchAvailabilityForAllRooms(start, end time.Time) ([]models.Room, error)
 	GetRoomByID(id int) (models.Room, error)
 	GetAllRooms() ([]models.Room, error)
+	GetRestrictionForRoomByDate(roomID int, start, end time.Time) ([]models.RoomRestriction, error)
 
 	GetUserByID(id int) (models.User, error)
 	UpdateUser(u models.User) error

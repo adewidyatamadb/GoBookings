@@ -128,3 +128,12 @@ func (m *testDBRepo) GetAllRooms() ([]models.Room, error) {
 
 	return rooms, nil
 }
+
+// GetRestrictionForRoomByDate returns restrictions for a room by date range
+func (m *testDBRepo) GetRestrictionForRoomByDate(roomID int, start, end time.Time) ([]models.RoomRestriction, error) {
+
+	var restrictions []models.RoomRestriction
+
+	return restrictions, nil
+
+}
