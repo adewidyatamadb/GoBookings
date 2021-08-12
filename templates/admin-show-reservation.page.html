@@ -48,9 +48,17 @@
                 <input type="text" name="phone" id="phone" class="form-control {{with .Form.Errors.Get "phone"}} is-invalid{{end}}" required autocomplete="off" value="{{$res.Phone}}">
             </div>
             <hr>
-            <input type="submit" value="Save" class="btn btn-primary">
-            <a href="/admin/reservations-{{$src}}" class="btn btn-warning">Cancel</a>
-            <a href="#!" class="btn btn-info" onclick="processRes({{$res.ID}})">Mark as Processed</a>
+            <div class="float-left">
+                <input type="submit" value="Save" class="btn btn-primary">
+                <a href="/admin/reservations-{{$src}}" class="btn btn-warning">Cancel</a>
+                {{if eq $src "new"}}
+                    <a href="#!" class="btn btn-info" onclick="processRes({{$res.ID}})">Mark as Processed</a>
+                {{end}}
+            </div>
+            <div class="float-right">
+                <a href="#!" class="btn btn-danger" onclick="deleteRes({{$res.ID}})">Delete Reservation</a>
+            </div>
+            <div class="clearfix"></div>
         </form>
     </div>
 {{end}}
@@ -65,6 +73,18 @@
                 callback: function(result){
                     if (result !== false){
                         window.location.href = "/admin/process-reservation/{{$src}}/"+id;
+                    }
+                },
+            })
+        }
+
+        function deleteRes(id){
+            attention.custom({
+                icon: "warning",
+                msg: "Are you sure?",
+                callback: function(result){
+                    if (result !== false){
+                        window.location.href = "/admin/delete-reservation/{{$src}}/"+id;
                     }
                 },
             })
