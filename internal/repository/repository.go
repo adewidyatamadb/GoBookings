@@ -21,4 +21,5 @@ type DatabaseRepo interface {
 
 	GetAllReservations() ([]models.Reservation, error)
 	GetAllNewReservations() ([]models.Reservation, error)
+	GetReservationByID(id int) (models.Reservation, error)
 }
