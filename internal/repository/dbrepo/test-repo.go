@@ -65,7 +65,7 @@ func (m *testDBRepo) SearchAvailabilityForAllRooms(start, end time.Time) ([]mode
 // GetRoomByID get a room by id
 func (m *testDBRepo) GetRoomByID(id int) (models.Room, error) {
 	var room models.Room
-	if id > 2 {
+	if id > 2 && id < 100 {
 		return room, errors.New("some error")
 	}
 	return room, nil
@@ -85,7 +85,10 @@ func (m *testDBRepo) UpdateUser(u models.User) error {
 
 // Authentice authenticates a user
 func (m *testDBRepo) Authenticate(email, testPassword string) (int, string, error) {
-	return 0, "", nil
+	if email == "me@here.com" {
+		return 1, "", nil
+	}
+	return 0, "", errors.New("some error")
 }
 
 // GetAllReservations returns a slice of all reservations

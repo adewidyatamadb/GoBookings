@@ -40,6 +40,14 @@ func TestGetHandlers(t *testing.T) {
 		{"majors suite page", "/majors-suite", "GET", http.StatusOK},
 		{"search availability page", "/search-availability", "GET", http.StatusOK},
 		{"contact page", "/contact", "GET", http.StatusOK},
+		{"non-existent", "/not-exist", "GET", http.StatusNotFound},
+		//admin route
+		{"login", "/user/login", "GET", http.StatusOK},
+		{"logout", "/user/logout", "GET", http.StatusOK},
+		{"dashboard", "/admin/dashboard", "GET", http.StatusOK},
+		{"new reservation", "/admin/reservations-new", "GET", http.StatusOK},
+		{"all reservation", "/admin/reservations-all", "GET", http.StatusOK},
+		{"show reservation", "/admin/reservations/new/1/show", "GET", http.StatusOK},
 	}
 
 	routes := getRoutes()
@@ -75,14 +83,14 @@ func TestRepository_Reservation(t *testing.T) {
 		}, http.StatusOK},
 		{"reservation not in session", models.Reservation{
 			RoomID: 1000,
-		}, http.StatusTemporaryRedirect},
+		}, http.StatusSeeOther},
 		{"room not exist", models.Reservation{
-			RoomID: 100,
+			RoomID: 99,
 			Room: models.Room{
-				ID:       100,
+				ID:       99,
 				RoomName: "Not Exist",
 			},
-		}, http.StatusTemporaryRedirect},
+		}, http.StatusSeeOther},
 	}
 
 	for _, test := range tableTest {
@@ -133,7 +141,7 @@ func TestRepository_PostReservation(t *testing.T) {
 			{key: "last_name", value: "Smith"},
 			{key: "email", value: "john@smith.com"},
 			{key: "phone", value: "555-555-5555"},
-		}, http.StatusTemporaryRedirect},
+		}, http.StatusSeeOther},
 		{"invalid departure date", []postData{
 			{key: "start_date", value: "12-10-2021"},
 			{key: "end_date", value: "invalid"},
@@ -142,7 +150,7 @@ func TestRepository_PostReservation(t *testing.T) {
 			{key: "last_name", value: "Smith"},
 			{key: "email", value: "john@smith.com"},
 			{key: "phone", value: "555-555-5555"},
-		}, http.StatusTemporaryRedirect},
+		}, http.StatusSeeOther},
 		{"invalid room id", []postData{
 			{key: "start_date", value: "12-10-2021"},
 			{key: "end_date", value: "13-10-2021"},
@@ -151,7 +159,16 @@ func TestRepository_PostReservation(t *testing.T) {
 			{key: "last_name", value: "Smith"},
 			{key: "email", value: "john@smith.com"},
 			{key: "phone", value: "555-555-5555"},
-		}, http.StatusTemporaryRedirect},
+		}, http.StatusSeeOther},
+		{"room not exist", []postData{
+			{key: "start_date", value: "12-10-2021"},
+			{key: "end_date", value: "13-10-2021"},
+			{key: "room_id", value: "99"},
+			{key: "first_name", value: "John"},
+			{key: "last_name", value: "Smith"},
+			{key: "email", value: "john@smith.com"},
+			{key: "phone", value: "555-555-5555"},
+		}, http.StatusSeeOther},
 		{"invalid user data", []postData{
 			{key: "start_date", value: "12-10-2021"},
 			{key: "end_date", value: "13-10-2021"},
@@ -160,7 +177,7 @@ func TestRepository_PostReservation(t *testing.T) {
 			{key: "last_name", value: "Smith"},
 			{key: "email", value: "john@smith.com"},
 			{key: "phone", value: "555-555-5555"},
-		}, http.StatusTemporaryRedirect},
+		}, http.StatusOK},
 		{"failed to insert reservation data", []postData{
 			{key: "start_date", value: "12-10-2021"},
 			{key: "end_date", value: "13-10-2021"},
@@ -169,7 +186,7 @@ func TestRepository_PostReservation(t *testing.T) {
 			{key: "last_name", value: "Smith"},
 			{key: "email", value: "john@smith.com"},
 			{key: "phone", value: "555-555-5555"},
-		}, http.StatusTemporaryRedirect},
+		}, http.StatusSeeOther},
 		{"failed to insert room restriction data", []postData{
 			{key: "start_date", value: "12-10-2021"},
 			{key: "end_date", value: "13-10-2021"},
@@ -178,14 +195,13 @@ func TestRepository_PostReservation(t *testing.T) {
 			{key: "last_name", value: "Smith"},
 			{key: "email", value: "john@smith.com"},
 			{key: "phone", value: "555-555-5555"},
-		}, http.StatusTemporaryRedirect},
-		{"body missing", []postData{}, http.StatusTemporaryRedirect},
+		}, http.StatusSeeOther},
+		{"body missing", []postData{}, http.StatusSeeOther},
 	}
 
 	for _, test := range tableTest {
 		postedData := url.Values{}
 		var r *http.Request
-
 		if test.name != "body missing" {
 			postedData.Add("start_date", test.params[0].value)
 			postedData.Add("end_date", test.params[1].value)
@@ -231,7 +247,7 @@ func TestRepository_ReservationSummary(t *testing.T) {
 		expectedStatusCode int
 	}{
 		{"intended case", true, http.StatusOK},
-		{"cannot get session", false, http.StatusTemporaryRedirect},
+		{"cannot get session", false, http.StatusSeeOther},
 	}
 
 	for _, test := range tableTest {
@@ -282,12 +298,20 @@ func TestRepository_PostAvailability(t *testing.T) {
 		{"cannot retrieve rooms data", []postData{
 			{key: "start", value: "01-01-2021"},
 			{key: "end", value: "12-11-2021"},
-		}, http.StatusTemporaryRedirect},
+		}, http.StatusSeeOther},
 		{"there are no room available", []postData{
 			{key: "start", value: "30-12-2020"},
 			{key: "end", value: "02-01-2021"},
 		}, http.StatusSeeOther},
-		{"missing request body", []postData{}, http.StatusTemporaryRedirect},
+		{"failed parsing arrival date", []postData{
+			{key: "start", value: "a"},
+			{key: "end", value: "02-01-2021"},
+		}, http.StatusSeeOther},
+		{"failed parsing departure date", []postData{
+			{key: "start", value: "30-12-2020"},
+			{key: "end", value: "b"},
+		}, http.StatusSeeOther},
+		{"missing request body", []postData{}, http.StatusSeeOther},
 	}
 
 	for _, test := range tableTest {
@@ -342,8 +366,8 @@ func TestRepository_ChooseRoom(t *testing.T) {
 				ID:       1,
 				RoomName: "General's Quarters",
 			},
-		}, true, http.StatusTemporaryRedirect},
-		{"reservation not in the session", "1", models.Reservation{}, false, http.StatusTemporaryRedirect},
+		}, true, http.StatusSeeOther},
+		{"reservation not in the session", "1", models.Reservation{}, false, http.StatusSeeOther},
 	}
 
 	for _, test := range tableTest {
@@ -464,7 +488,7 @@ func TestRepository_BookRoom(t *testing.T) {
 			{key: "id", value: "3"},
 			{key: "start_date", value: "11-11-2021"},
 			{key: "end_date", value: "12-11-2021"},
-		}, http.StatusTemporaryRedirect},
+		}, http.StatusSeeOther},
 	}
 
 	for _, test := range tableTest {
@@ -483,6 +507,63 @@ func TestRepository_BookRoom(t *testing.T) {
 	}
 }
 
+var loginTests = []struct {
+	name               string
+	email              string
+	expectedStatusCode int
+	expectedHTML       string
+	expectedLocation   string
+}{
+	{"valid credential", "me@here.com", http.StatusSeeOther, "", "/"},
+	{"invalid credential", "jack@here.com", http.StatusSeeOther, "", "/user/login"},
+	{"invalid data", "j", http.StatusOK, `action="/user/login"`, ""},
+}
+
+func TestLogin(t *testing.T) {
+	// range through all tests
+	for _, test := range loginTests {
+		postedData := url.Values{}
+		postedData.Add("email", test.email)
+		postedData.Add("password", "password")
+
+		// create a request
+		req := httptest.NewRequest("POST", "/user/login", strings.NewReader(postedData.Encode()))
+		ctx := getCTX(req)
+		req = req.WithContext(ctx)
+
+		// set the req header
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		w := httptest.NewRecorder()
+
+		// call the handler
+		handler := http.HandlerFunc(Repo.PostShowLogin)
+		handler.ServeHTTP(w, req)
+
+		if w.Code != test.expectedStatusCode {
+			t.Errorf("case - %s: expected code %d but got %d", test.name, test.expectedStatusCode, w.Code)
+		}
+
+		if test.expectedLocation != "" {
+			// get the url from test
+			actualLoc, _ := w.Result().Location()
+			if actualLoc.String() != test.expectedLocation {
+				t.Errorf("case - %s: expected location %s, but got location %s", test.name, test.expectedLocation, actualLoc.String())
+			}
+		}
+
+		//checking for expected values in HTML
+		if test.expectedHTML != "" {
+			// read the response body into string
+			html := w.Body.String()
+			if !strings.Contains(html, test.expectedHTML) {
+				t.Errorf("case - %s: expected to find %s but did not", test.name, test.expectedHTML)
+			}
+		}
+	}
+}
+
+// getCTX get the context
 func getCTX(req *http.Request) context.Context {
 	ctx, err := session.Load(req.Context(), req.Header.Get("X-Session"))
 	if err != nil {
