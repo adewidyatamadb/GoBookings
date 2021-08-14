@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -558,6 +559,220 @@ func TestLogin(t *testing.T) {
 			html := w.Body.String()
 			if !strings.Contains(html, test.expectedHTML) {
 				t.Errorf("case - %s: expected to find %s but did not", test.name, test.expectedHTML)
+			}
+		}
+	}
+}
+
+func TestRepository_AdminPostShowReservation(t *testing.T) {
+	var tableTest = []struct {
+		name               string
+		year               string
+		month              string
+		src                string
+		expectedStatusCode int
+		expectedLocation   string
+	}{
+		{"update from all reservations page", "", "", "all", http.StatusSeeOther, "/admin/reservations-all"},
+		{"update from new reservations page", "", "", "new", http.StatusSeeOther, "/admin/reservations-new"},
+		{"update from new reservations page", "2021", "11", "cal", http.StatusSeeOther, "/admin/reservations-calendar?y=2021&m=11"},
+	}
+
+	for _, test := range tableTest {
+		postedData := url.Values{}
+		postedData.Add("first_name", "John")
+		postedData.Add("last_name", "John")
+		postedData.Add("email", "John")
+		postedData.Add("phone", "John")
+		postedData.Add("month", test.month)
+		postedData.Add("year", test.year)
+
+		// create a request
+		req := httptest.NewRequest("POST", fmt.Sprintf("/admin/reservations/%s/1", test.src), strings.NewReader(postedData.Encode()))
+		ctx := getCTX(req)
+		req = req.WithContext(ctx)
+
+		// set the req header
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		w := httptest.NewRecorder()
+
+		// call the handler
+		handler := http.HandlerFunc(Repo.AdminPostShowReservation)
+		handler.ServeHTTP(w, req)
+
+		if w.Code != test.expectedStatusCode {
+			t.Errorf("case - %s: expected code %d but got %d", test.name, test.expectedStatusCode, w.Code)
+		}
+
+		if test.expectedLocation != "" {
+			// get the url from test
+			actualLoc, _ := w.Result().Location()
+			if actualLoc.String() != test.expectedLocation {
+				t.Errorf("case - %s: expected location %s, but got location %s", test.name, test.expectedLocation, actualLoc.String())
+			}
+		}
+	}
+}
+
+func TestRepository_AdminReservationsCalendar(t *testing.T) {
+	var tableTest = []struct {
+		name               string
+		month              string
+		year               string
+		expectedStatusCode int
+	}{
+		{"empty year and month", "", "", http.StatusOK},
+		{"with year and month", "02", "2021", http.StatusOK},
+	}
+
+	for _, test := range tableTest {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", fmt.Sprintf("/admin/reservations-calendar?y=%s&m=%s", test.year, test.month), nil)
+		ctx := getCTX(r)
+		r = r.WithContext(ctx)
+
+		handler := http.HandlerFunc(Repo.AdminReservationsCalendar)
+
+		handler.ServeHTTP(w, r)
+		if w.Code != test.expectedStatusCode {
+			t.Errorf("case - %s: reservation handler returned wrong response code: got %d, wanted %d", test.name, w.Code, test.expectedStatusCode)
+		}
+	}
+}
+
+func TestRepository_AdminPostReservationsCalendar(t *testing.T) {
+	// example session.Put(r.Context(), "reservation", test.sessionParams)
+	var tableTest = []struct {
+		name               string
+		month              string
+		year               string
+		expectedStatusCode int
+		expectedLocation   string
+		removeBlock        bool
+		addBlock           bool
+	}{
+		{"no block and reservations", "2", "2021", http.StatusSeeOther, "/admin/reservations-calendar?y=2021&m=2", false, false},
+		{"removing block and adding block", "2", "2021", http.StatusSeeOther, "/admin/reservations-calendar?y=2021&m=2", true, true},
+	}
+
+	for _, test := range tableTest {
+		blockMap := make(map[string]int)
+		blockMap["11-2-2021"] = 1
+		postedData := url.Values{}
+		postedData.Add("m", test.month)
+		postedData.Add("y", test.year)
+
+		if test.removeBlock {
+			postedData.Add("remove_block_1_11-2-2021", "")
+		}
+
+		if test.addBlock {
+			postedData.Add("add_block_1_12-2-2021", "1")
+		}
+
+		// create a request
+		req := httptest.NewRequest("POST", "/reservation-calendar", strings.NewReader(postedData.Encode()))
+		ctx := getCTX(req)
+		req = req.WithContext(ctx)
+		session.Put(req.Context(), "block_map_1", blockMap)
+
+		// set the req header
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		w := httptest.NewRecorder()
+
+		// call the handler
+		handler := http.HandlerFunc(Repo.AdminPostReservationsCalendar)
+		handler.ServeHTTP(w, req)
+		if w.Code != test.expectedStatusCode {
+			t.Errorf("case - %s: expected code %d but got %d", test.name, test.expectedStatusCode, w.Code)
+		}
+
+		if test.expectedLocation != "" {
+			// get the url from test
+			actualLoc, _ := w.Result().Location()
+			if actualLoc.String() != test.expectedLocation {
+				t.Errorf("case - %s: expected location %s, but got location %s", test.name, test.expectedLocation, actualLoc.String())
+			}
+		}
+	}
+}
+
+func TestRepository_AdminProcessReservation(t *testing.T) {
+	var tableTest = []struct {
+		name               string
+		year               string
+		month              string
+		src                string
+		expectedStatusCode int
+		expectedLocation   string
+	}{
+		{"update from new reservations page", "", "", "new", http.StatusSeeOther, "/admin/reservations-new"},
+		{"update from all reservations page", "", "", "all", http.StatusSeeOther, "/admin/reservations-all"},
+		{"update from reservations calendar page", "2021", "2", "cal", http.StatusSeeOther, "/admin/reservations-calendar?y=2021&m=2"},
+	}
+
+	for _, test := range tableTest {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", fmt.Sprintf("/admin/process-reservation/%s/1/do?y=%s&m=%s", test.src, test.year, test.month), nil)
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "1")
+		rctx.URLParams.Add("src", test.src)
+		ctx := getCTX(r)
+		r = r.WithContext(context.WithValue(ctx, chi.RouteCtxKey, rctx))
+
+		handler := http.HandlerFunc(Repo.AdminProcessReservation)
+
+		handler.ServeHTTP(w, r)
+		if w.Code != test.expectedStatusCode {
+			t.Errorf("case - %s: reservation handler returned wrong response code: got %d, wanted %d", test.name, w.Code, test.expectedStatusCode)
+		}
+
+		if test.expectedLocation != "" {
+			// get the url from test
+			actualLoc, _ := w.Result().Location()
+			if actualLoc.String() != test.expectedLocation {
+				t.Errorf("case - %s: expected location %s, but got location %s", test.name, test.expectedLocation, actualLoc.String())
+			}
+		}
+	}
+}
+func TestRepository_AdminDeleteReservation(t *testing.T) {
+	var tableTest = []struct {
+		name               string
+		year               string
+		month              string
+		src                string
+		expectedStatusCode int
+		expectedLocation   string
+	}{
+		{"delete from new reservations page", "", "", "new", http.StatusSeeOther, "/admin/reservations-new"},
+		{"delete from all reservations page", "", "", "all", http.StatusSeeOther, "/admin/reservations-all"},
+		{"delete from reservations calendar page", "2021", "2", "cal", http.StatusSeeOther, "/admin/reservations-calendar?y=2021&m=2"},
+	}
+
+	for _, test := range tableTest {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", fmt.Sprintf("/admin/delete-reservation/%s/1/do?y=%s&m=%s", test.src, test.year, test.month), nil)
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "1")
+		rctx.URLParams.Add("src", test.src)
+		ctx := getCTX(r)
+		r = r.WithContext(context.WithValue(ctx, chi.RouteCtxKey, rctx))
+
+		handler := http.HandlerFunc(Repo.AdminDeleteReservation)
+
+		handler.ServeHTTP(w, r)
+		if w.Code != test.expectedStatusCode {
+			t.Errorf("case - %s: reservation handler returned wrong response code: got %d, wanted %d", test.name, w.Code, test.expectedStatusCode)
+		}
+
+		if test.expectedLocation != "" {
+			// get the url from test
+			actualLoc, _ := w.Result().Location()
+			if actualLoc.String() != test.expectedLocation {
+				t.Errorf("case - %s: expected location %s, but got location %s", test.name, test.expectedLocation, actualLoc.String())
 			}
 		}
 	}
