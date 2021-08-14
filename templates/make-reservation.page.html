@@ -10,13 +10,13 @@
                     <strong>Reservation details</strong>
                     <br>
                     Room: {{$res.Room.RoomName}} <br>
-                    Arrival: {{index .StringMap "start_date"}} <br>
-                    Departure: {{index .StringMap "end_date"}}
+                    Arrival: {{humanDate $res.StartDate}} <br>
+                    Departure: {{humanDate $res.EndDate}}
                 </p>
                 <form action="/make-reservation" method="post" class="" novalidate>
                     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-                    <input type="hidden" name="start_date" value="{{index .StringMap "start_date"}}">
-                    <input type="hidden" name="end_date" value="{{index .StringMap "end_date"}}">
+                    <input type="hidden" name="start_date" value="{{valueDate $res.StartDate}}">
+                    <input type="hidden" name="end_date" value="{{valueDate $res.EndDate}}">
                     <input type="hidden" name="room_id" value="{{$res.RoomID}}">
                     
                     <div class="mt-3 form-group">

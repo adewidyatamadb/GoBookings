@@ -16,6 +16,7 @@ import (
 
 var functions = template.FuncMap{
 	"humanDate":  HumanDate,
+	"valueDate":  ValueDate,
 	"formatDate": FormatDate,
 	"iterate":    Iterate,
 	"add":        Add,
@@ -46,6 +47,10 @@ func NewRenderer(a *config.AppConfig) {
 // HumanDate returns readable date
 func HumanDate(t time.Time) string {
 	return t.Format("02-Jan-2006")
+}
+
+func ValueDate(t time.Time) string {
+	return t.Format("02-01-2006")
 }
 
 func FormatDate(t time.Time, f string) string {

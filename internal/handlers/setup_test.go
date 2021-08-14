@@ -26,6 +26,7 @@ var pathToTemplates = "./../../templates"
 
 var functions = template.FuncMap{
 	"humanDate":  render.HumanDate,
+	"valueDate":  render.ValueDate,
 	"formatDate": render.FormatDate,
 	"iterate":    render.Iterate,
 	"add":        render.Add,
