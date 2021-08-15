@@ -1,0 +1,1 @@
+INSERT INTO public.users (first_name, last_name, email, "password", access_level, created_at, updated_at) VALUES('Admin', 'Fortnight', 'admin@admin.com', '$2a$12$vpUqEp802ZW9SwjS6wtBzOq.ICo7aSmzXOl82.XmfMEobCYN/xWMS', 3, '2021-11-11 00:00:00.000', '2021-11-11 00:00:00.000');
