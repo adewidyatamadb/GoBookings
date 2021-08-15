@@ -1,5 +1,5 @@
 .footer {
-  height: 5em;
+  /* height: auto; */
   background-color: #153b65;
   margin-top: 1.5em;
   padding: 1em;
@@ -9,10 +9,6 @@
 
 .room-image {
   max-width: 50%;
-}
-
-.notie-container {
-  box-shadow: none;
 }
 
 .datepicker {
